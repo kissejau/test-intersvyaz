@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  kafka:
+    image: wurstmeister/kafka:latest
+    container_name: intersvyaz-kafka
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka:29093,OUTSIDE://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+      KAFKA_LISTENERS: INSIDE://0.0.0.0:29093,OUTSIDE://0.0.0.0:29092
+      KAFKA_ZOOKEEPER_CONNECT: intersvyaz-zookeeper:2181
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+
+  zookeeper:
+    image: wurstmeister/zookeeper:latest
+    container_name: intersvyaz-zookeeper
+    restart: always
+    ports:
+      - "2181:2181"
+
+  postgres:
+    container_name: intersvyaz-postgres
+    image: postgres:latest
+    user: postgres
+    environment:
+      - POSTGRES_DB=intersvyaz
+      - POSTGRES_PASSWORD=1234
+      - PGDATA=/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    volumes:
+      - intersvyaz-pg-data:/var/lib/postgresql/data
+
+  backend:
+    container_name: intersvyaz-backend
+    image: intersvyaz-backend
+    build:
+      context: ../
+      dockerfile: build/Dockerfile
+    ports:
+      - "8081:8080"
+    depends_on:
+      postgres:
+        condition: service_started
+    volumes:
+      - ../db/migrations:/db/migrations
+
+volumes:
+  intersvyaz-pg-data:

@@ -1,0 +1,3 @@
+DROP INDEX IF EXISTS newest_metrics;
+
+DROP TABLE IF EXISTS metrics;
