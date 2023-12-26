@@ -46,6 +46,8 @@ services:
     depends_on:
       postgres:
         condition: service_started
+      kafka:
+        condition: service_started
     volumes:
       - ../db/migrations:/db/migrations
 
