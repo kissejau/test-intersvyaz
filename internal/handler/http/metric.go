@@ -31,9 +31,9 @@ func (h *Handler) Track(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.amqpProducer.Track(ctx, metric); err != nil {
-		response.NewErrorResponse(w, r, http.StatusBadRequest, err.Error())
+		response.NewErrorResponse(w, r, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	response.NewResponse(w, r, http.StatusAccepted, "metric was tracked")
+	response.NewSuccessResponse(w, r, http.StatusAccepted, "metric was tracked")
 }
